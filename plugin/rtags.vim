@@ -856,7 +856,7 @@ endfunction
 
 function! rtags#FindVirtualsFzf()
   call fzf#vim#grep(
-          \   s:bin_dir.'rtags-virtuals'.expand('%:p').' '.line(".").' '.col(".").' '.getcwd(), 1,
+          \   s:bin_dir.'rtags-virtuals '.expand('%:p').' '.line(".").' '.col(".").' '.getcwd(), 1,
           \   fzf#vim#with_preview())
 endfunction
 
