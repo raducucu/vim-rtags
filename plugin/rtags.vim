@@ -948,51 +948,6 @@ function! rtags#Diagnostics()
     return s:Pyeval("vimrtags.get_diagnostics()")
 endfunction
 
-"
-" This function assumes it is invoked from insert mode
-"
-function! rtags#CompleteAtCursor(wordStart, base)
-    let flags = "--synchronous-completions -l"
-    let file = expand("%:p")
-    let pos = getpos('.')
-    let line = pos[1] 
-    let col = pos[2]
-
-    if index(['.', '::', '->'], a:base) != -1
-        let col += 1
-    endif
-
-    let rcRealCmd = rtags#getRcCmd()
-
-    exec "normal! \<Esc>"
-    let stdin_lines = join(getline(1, "$"), "\n").a:base
-    let offset = len(stdin_lines)
-
-    exec "startinsert!"
-    "    echomsg getline(line)
-    "    sleep 1
-    "    echomsg "DURING INVOCATION POS: ".pos[2]
-    "    sleep 1
-    "    echomsg stdin_lines
-    "    sleep 1
-    " sed command to remove CDATA prefix and closing xml tag from rtags output
-    let sed_cmd = "sed -e 's/.*CDATA\\[//g' | sed -e 's/.*\\/completions.*//g'"
-    let cmd = printf("%s %s %s:%s:%s --unsaved-file=%s:%s | %s", rcRealCmd, flags, file, line, col, file, offset, sed_cmd)
-    call rtags#Log("Command line:".cmd)
-
-    let result = split(system(cmd, stdin_lines), '\n\+')
-    "    echomsg "Got ".len(result)." completions"
-    "    sleep 1
-    call rtags#Log("-----------")
-    "call rtags#Log(result)
-    call rtags#Log("-----------")
-    return result
-    "    for r in result
-    "        echo r
-    "    endfor
-    "    call rtags#DisplayResults(result)
-endfunction
-
 function! s:Pyeval( eval_string )
   if g:rtagsPy == 'python3'
       return py3eval( a:eval_string )
@@ -1001,15 +956,6 @@ function! s:Pyeval( eval_string )
   endif
 endfunction
     
-function! s:RcExecuteJobCompletion()
-    call rtags#SetJobStateFinish()
-    if ! empty(b:rtags_state['stdout']) && mode() == 'i'
-        call feedkeys("\<C-x>\<C-o>", "t")
-    else
-        call RtagsCompleteFunc(0, RtagsCompleteFunc(1, 0))
-    endif
-endfunction
-
 "{{{ RcExecuteJobHandler
 "Handles stdout/stderr/exit events, and stores the stdout/stderr received from the shells.
 function! RcExecuteJobHandler(job_id, data, event)
@@ -1121,49 +1067,6 @@ function! s:RcJobExecute(offset, line, col)
 
 endf
 
-"""
-" Temporarily the way this function works is:
-"     - completeion invoked on
-"         object.meth*
-"       , where * is cursor position
-"     - find the position of a dot/arrow
-"     - invoke completion through rc
-"     - filter out options that start with meth (in this case).
-"     - show completion options
-" 
-"     Reason: rtags returns all options regardless of already type method name
-"     portion
-"""
-
-function! RtagsCompleteFunc(findstart, base)
-    if s:rtagsAsync == 1 && !has('nvim')
-        return s:RtagsCompleteFunc(a:findstart, a:base, 1)
-    else
-        return s:RtagsCompleteFunc(a:findstart, a:base, 0)
-    endif
-endfunction
-
-function! s:RtagsCompleteFunc(findstart, base, async)
-    call rtags#Log("RtagsCompleteFunc: [".a:findstart."], [".a:base."]")
-
-    if a:findstart
-        let s:line = getline('.')
-        let s:start = col('.') - 2
-        return s:Pyeval("vimrtags.get_identifier_beginning()")
-    else
-        let pos = getpos('.')
-        let s:file = expand("%:p")
-        let s:line = str2nr(pos[1])
-        let s:col = str2nr(pos[2]) + len(a:base)
-        let s:prefix = a:base
-        return s:Pyeval("vimrtags.send_completion_request()")
-    endif
-endfunction
-
-if &completefunc == ""
-    set completefunc=RtagsCompleteFunc
-endif
-
 " Helpers to access script locals for unit testing {{{
 function! s:get_SID()
     return matchstr(expand('<sfile>'), '<SNR>\d\+_')
@@ -1175,15 +1078,4 @@ function! rtags#__context__()
     return { 'sid': s:SID, 'scope': s: }
 endfunction
 "}}}
-
-command! -nargs=1 -complete=customlist,rtags#CompleteSymbols RtagsFindSymbols call rtags#FindSymbols(<q-args>)
-command! -nargs=1 -complete=customlist,rtags#CompleteSymbols RtagsFindRefsByName call rtags#FindRefsByName(<q-args>)
-
-command! -nargs=1 -complete=customlist,rtags#CompleteSymbols RtagsIFindSymbols call rtags#IFindSymbols(<q-args>)
-command! -nargs=1 -complete=customlist,rtags#CompleteSymbols RtagsIFindRefsByName call rtags#IFindRefsByName(<q-args>)
-
-command! -nargs=1 -complete=dir RtagsLoadCompilationDb call rtags#LoadCompilationDb(<q-args>)
-
-" The most commonly used find operation
-command! -nargs=1 -complete=customlist,rtags#CompleteSymbols Rtag RtagsIFindSymbols <q-args>
 
