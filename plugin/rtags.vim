@@ -815,7 +815,7 @@ function! rtags#ShowHierarchy()
     call rtags#ExecuteThen(args, [function('rtags#ViewHierarchy')])
 endfunction
 
-function! rtags#ShowHierarchyFzf
+function! rtags#ShowHierarchyFzf()
   call fzf#vim#grep(
           \   '/home/radu/rtags-hierarchy '.expand('%:p').' '.line(".").' '.col(".").' '.getcwd(), 1,
           \   fzf#vim#with_preview(), <bang>0)
