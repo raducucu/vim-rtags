@@ -17,7 +17,7 @@ else
     finish
 end
 
-
+let s:bin_dir = expand('<sfile>:p:h:h').'/bin/'
 
 if !exists("g:rtagsRcCmd")
     let g:rtagsRcCmd = "rc"
@@ -813,6 +813,12 @@ function! rtags#ShowHierarchy()
     let args = {'--class-hierarchy' : rtags#getCurrentLocation() }
 
     call rtags#ExecuteThen(args, [function('rtags#ViewHierarchy')])
+endfunction
+
+function! rtags#ShowHierarchyFzf
+  call fzf#vim#grep(
+          \   '/home/radu/rtags-hierarchy '.expand('%:p').' '.line(".").' '.col(".").' '.getcwd(), 1,
+          \   fzf#vim#with_preview(), <bang>0)
 endfunction
 
 function! rtags#FindRefsCallTree()
