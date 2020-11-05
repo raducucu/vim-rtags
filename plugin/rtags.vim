@@ -809,6 +809,13 @@ function! rtags#FindRefs()
     call rtags#ExecuteThen(args, [function('rtags#DisplayResults')])
 endfunction
 
+function! rtags#FindRefsFzf()
+call fzf#vim#grep(
+        \   s:bin_dir.'rtags-refs '.expand('%:p').' '.line(".").' '.col(".").' '.getcwd(), 1,
+        \   fzf#vim#with_preview(), <bang>0)
+endfunction
+
+
 function! rtags#ShowHierarchy()
     let args = {'--class-hierarchy' : rtags#getCurrentLocation() }
 
