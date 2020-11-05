@@ -1,0 +1,11 @@
+#!/bin/bash
+file=$1
+line=$2
+col=$3
+wd=$4
+
+while read -r outl; do
+  echo ${outl#${wd%/}/}
+done <<< "$(rc --absolute-path --class-hierarchy ${file}:${line}:${col} | ag -o '\S+:[0-9]+:[0-9]+:.*')"
+
+
