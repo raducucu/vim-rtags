@@ -815,7 +815,6 @@ call fzf#vim#grep(
         \   fzf#vim#with_preview(), <bang>0)
 endfunction
 
-
 function! rtags#ShowHierarchy()
     let args = {'--class-hierarchy' : rtags#getCurrentLocation() }
 
