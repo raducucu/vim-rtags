@@ -854,6 +854,12 @@ function! rtags#FindVirtuals()
     call rtags#ExecuteThen(args, [function('rtags#DisplayResults')])
 endfunction
 
+function! rtags#ShowVirtualsFzf()
+  call fzf#vim#grep(
+          \   s:bin_dir.'rtags-virtuals'.expand('%:p').' '.line(".").' '.col(".").' '.getcwd(), 1,
+          \   fzf#vim#with_preview())
+endfunction
+
 function! rtags#FindRefsByName(name)
     let args = {
                 \ '-a' : '',
