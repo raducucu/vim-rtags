@@ -812,7 +812,7 @@ endfunction
 function! rtags#FindRefsFzf()
 call fzf#vim#grep(
         \   s:bin_dir.'rtags-refs '.expand('%:p').' '.line(".").' '.col(".").' '.getcwd(), 1,
-        \   fzf#vim#with_preview(), <bang>0)
+        \   fzf#vim#with_preview())
 endfunction
 
 function! rtags#ShowHierarchy()
